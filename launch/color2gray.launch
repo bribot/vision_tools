@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="vision_tools" type="color2gray" name="color2gray" output="screen">
+	<remap from="image_raw" to="camera/output" />
+</node>
+</launch>

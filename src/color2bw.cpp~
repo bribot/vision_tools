@@ -1,0 +1,48 @@
+#include <ros/ros.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include "opencv2/opencv.hpp"
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+static const std::string OPENCV_WINDOW = "image window"
+
+class ImageConverter
+{
+	ros::NodeHandle nh_;
+	image_transport::ImageTransport it_;
+	image_transport::Subscriber image_sub_;
+	image_transport::Publisher image_pub_;
+
+%%
+std::ostringstream oss;
+using namespace std;
+using namespace cv;
+
+int main(int, char**)//int argc, char** argv)
+{
+	VideoCapture cap(1);
+	if(!cap.isOpened())
+		return -1;
+	//char str[20] ="./img/img%i.jpg"
+	for(int i = 0;i<1000;i++)
+	{
+		oss.str("");
+		Mat image, frame;
+		cap >> frame; //grab frame
+		cvtColor( frame, frame, CV_BGR2GRAY );
+		//GaussianBlur(frame, image, cv::Size(0, 0), 3);
+		//addWeighted(frame, 1.5, image, -0.5, 0, image);
+		//Canny(frame,frame,50,150,3);
+		//imshow("feed",frame);
+		//if(waitKey(1)>=0)
+		//	break;
+		oss<< "./img/img" << i << ".jpg";
+		imwrite(oss.str(),frame);
+		//cout<<oss.str()<<"\n";
+	}
+	return 0;
+}
+
