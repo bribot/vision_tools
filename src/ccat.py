@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Dec 13 11:55:21 2017
+#"""
+#Created on Wed Dec 13 11:55:21 2017
 
-@author: bri
-"""
+#author: bri
+#"""
 #!/usr/bin/env python
 import sys,time
 import cv2
@@ -158,7 +158,7 @@ class ccat:
         
         
 
-def main():
+def main(args):
     print "ok"
     rospy.init_node("ccat", anonymous=True)
     ic = ccat()
@@ -170,4 +170,4 @@ def main():
     
 
 if __name__=="__main__":
-    main()
+    main(sys.argv)
