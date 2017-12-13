@@ -18,7 +18,7 @@ from scipy.ndimage import filters
 
 # OpenCV
 import cv2
-c=cv2.VideoCapture(1)
+c=cv2.VideoCapture(-1)
 
 # Ros libraries
 import roslib

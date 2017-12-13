@@ -177,5 +177,3 @@ target_link_libraries(camera_publisher ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 add_executable(image_publisher src/image_publisher.cpp)
 target_link_libraries(image_publisher ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
-add_executable(ccat src/ccat.cpp)
-target_link_libraries(ccat ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
