@@ -11,33 +11,36 @@ import numpy as np
 #Importing ROS libraries
 import roslib
 import rospy
-from cv_bridge import CvBridge,CvBridgeError
+from cv_bridge import CvBridge, CvBridgeError
 
 #ROS messages
 from sensor_msgs.msg import Image
 
 VERBOSE=False
 
-#Image Global Variables
-minH = 22
-maxH = 37
-minS = 109
-maxS = 255
-minV = 115
-maxV = 255
-alpha=1.0
-win1 = 'Trackbars'
-win2 = 'Final'
-win3 = 'Debug'
+#TODO: MAKE IT WORK WITH ROSRUN
 
 class ccat:
     
     def __init__(self):
+        #Image Global Variables
+        self.minH = 22
+        self.maxH = 37
+        self.minS = 109
+        self.maxS = 255
+        self.minV = 115
+        self.maxV = 255
+        self.alpha=1.0
+        self.beta=1.0
+        self.win1 = 'Trackbars'
+        self.win2 = 'Final'
+        self.win3 = 'Debug'
+
         self.bridge = CvBridge()
-        cv2.namedWindow(win1,0)
+        cv2.namedWindow(self.win1,0)
         #cv2.resizeWindow(win1,700,50)
-        cv2.namedWindow(win2)
-        cv2.setMouseCallback(win2,self.clickr)
+        cv2.namedWindow(self.win2)
+        cv2.setMouseCallback(self.win2,self.clickr)
         self.hsv=[0,0,0]
         #Region Of Interest
         self.roiPnt = [(0,0), (10,10)]
@@ -58,36 +61,36 @@ class ccat:
             print(e)
             
         if VERBOSE:
-            cv2.imshow(win3,img0)
+            cv2.imshow(self.win3,img0)
             cv2.waitKey(2)
         #Temporal HSV varivables initialization
         img = cv2.cvtColor(img0, cv2.COLOR_BGR2HSV)
-        maxH = cv2.getTrackbarPos('Max H', win1)
-        minH = cv2.getTrackbarPos('Min H', win1)
-        maxS = cv2.getTrackbarPos('Max S', win1)
-        minS = cv2.getTrackbarPos('Min S', win1)
-        maxV = cv2.getTrackbarPos('Max V', win1)
-        minV = cv2.getTrackbarPos('Min V', win1)
-        alpha = cv2.getTrackbarPos("alpha", win1) * 0.01
-        beta = 1.0
+        self.maxH = cv2.getTrackbarPos('Max H', self.win1)
+        self.minH = cv2.getTrackbarPos('Min H', self.win1)
+        self.maxS = cv2.getTrackbarPos('Max S', self.win1)
+        self.minS = cv2.getTrackbarPos('Min S', self.win1)
+        self.maxV = cv2.getTrackbarPos('Max V', self.win1)
+        self.minV = cv2.getTrackbarPos('Min V', self.win1)
+        self.alpha = cv2.getTrackbarPos("alpha", self.win1) * 0.01
+        
         #Arrays fortrackbars
-        hsvMax = np.array((maxH, maxS, maxV))
-        hsvMin = np.array((minH, minS, minV))
+        hsvMax = np.array((self.maxH, self.maxS, self.maxV))
+        hsvMin = np.array((self.minH, self.minS, self.minV))
         #Image processing
         img_hsv = cv2.GaussianBlur(img,(11,11),0)
         img = cv2.inRange(img_hsv, hsvMin, hsvMax)
         img = self.noiseCleaner(img)
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
-        img2 = cv2.addWeighted(img0, alpha, img, beta, 0.0)
+        img2 = cv2.addWeighted(img0, self.alpha, img, self.beta, 0.0)
         if self.roiSet | self.roiDrag:
             cv2.rectangle(img2, self.roiPnt[0], self.roiPnt[1], (0,255,0), 2)
         #Text on image
         tSize=0.4
-        cv2.putText(img2,'H = %i, %i (%i)' %(minH,maxH,self.hsv[0]), (10,20),cv2.FONT_HERSHEY_SIMPLEX, tSize, (255,255,255))
-        cv2.putText(img2,'S = %i, %i (%i)'%(minS,maxS,self.hsv[1]), (10,35),cv2.FONT_HERSHEY_SIMPLEX, tSize, (255,255,255))
-        cv2.putText(img2,'V = %i, %i (%i)'%(minV,maxV,self.hsv[2]), (10,50),cv2.FONT_HERSHEY_SIMPLEX, tSize, (255,255,255))
+        cv2.putText(img2,'H = %i, %i (%i)' %(self.minH,self.maxH,self.hsv[0]), (10,20),cv2.FONT_HERSHEY_SIMPLEX, tSize, (255,255,255))
+        cv2.putText(img2,'S = %i, %i (%i)'%(self.minS,self.maxS,self.hsv[1]), (10,35),cv2.FONT_HERSHEY_SIMPLEX, tSize, (255,255,255))
+        cv2.putText(img2,'V = %i, %i (%i)'%(self.minV,self.maxV,self.hsv[2]), (10,50),cv2.FONT_HERSHEY_SIMPLEX, tSize, (255,255,255))
         #Show Final Image
-        cv2.imshow(win2,img2)
+        cv2.imshow(self.win2,img2)
         cv2.waitKey(2)
         #ROI behaviour
         if self.roiSet:
@@ -98,12 +101,12 @@ class ccat:
             var = 15
             if self.hsv[0] < var:
                 var = 5
-            cv2.setTrackbarPos('Max H', win1, np.uint8(self.hsv[0])+var)
-            cv2.setTrackbarPos('Min H', win1, np.uint8(self.hsv[0]-var))
+            cv2.setTrackbarPos('Max H', self.win1, np.uint8(self.hsv[0])+var)
+            cv2.setTrackbarPos('Min H', self.win1, np.uint8(self.hsv[0]-var))
             #cv2.setTrackbarPos('Max S', win1, int(hsv[1]+5))
-            cv2.setTrackbarPos('Min S', win1, np.uint8(self.hsv[1]-15))
+            cv2.setTrackbarPos('Min S', self.win1, np.uint8(self.hsv[1]-15))
             #cv2.setTrackbarPos('Max V', win1, int(hsv[2]+15))
-            cv2.setTrackbarPos('Min V', win1, np.uint8(self.hsv[2]-15))
+            cv2.setTrackbarPos('Min V', self.win1, np.uint8(self.hsv[2]-15))
             self.roiSet = False
         
     def clickr(self,event, x, y, flags, img):
@@ -126,13 +129,13 @@ class ccat:
             self.roiSet=True
     
     def createTrackbars(self):
-        cv2.createTrackbar('Max H',win1,maxH,255,self.nothing)
-        cv2.createTrackbar('Min H',win1,minH,255,self.nothing)
-        cv2.createTrackbar('Max S',win1,maxS,255,self.nothing)
-        cv2.createTrackbar('Min S',win1,minS,255,self.nothing)
-        cv2.createTrackbar('Max V',win1,maxV,255,self.nothing)
-        cv2.createTrackbar('Min V',win1,minV,255,self.nothing)
-        cv2.createTrackbar("alpha",win1,int(alpha*100),100,self.nothing)
+        cv2.createTrackbar('Max H',self.win1,self.maxH,255,self.nothing)
+        cv2.createTrackbar('Min H',self.win1,self.minH,255,self.nothing)
+        cv2.createTrackbar('Max S',self.win1,self.maxS,255,self.nothing)
+        cv2.createTrackbar('Min S',self.win1,self.minS,255,self.nothing)
+        cv2.createTrackbar('Max V',self.win1,self.maxV,255,self.nothing)
+        cv2.createTrackbar('Min V',self.win1,self.minV,255,self.nothing)
+        cv2.createTrackbar("alpha",self.win1,int(self.alpha*100),100,self.nothing)
         
     def setHSV(self,img):
     	hsv=[]
@@ -159,8 +162,8 @@ class ccat:
         
 
 def main(args):
-    print "ok"
-    rospy.init_node("ccat", anonymous=True)
+    
+    rospy.init_node('ccat', anonymous=True)
     ic = ccat()
     try:
         rospy.spin()
@@ -169,5 +172,7 @@ def main(args):
     cv2.destroyAllWindows()
     
 
-if __name__=="__main__":
+
+if __name__ == '__main__':
+    print("This is fine")
     main(sys.argv)
